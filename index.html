@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ブロック制ポイント計算機</title>
+    <style>
+        body {
+            font-family: 'Hiragino Sans', 'Meiryo', sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+```
+    .container {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 30px;
+        font-size: 2rem;
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .input-section {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        padding: 25px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        border: 1px solid #dee2e6;
+    }
+    
+    label {
+        display: block;
+        margin-bottom: 12px;
+        font-weight: bold;
+        color: #495057;
+        font-size: 16px;
+    }
+    
+    input[type="number"] {
+        width: 100%;
+        padding: 15px;
+        border: 2px solid #ddd;
+        border-radius: 10px;
+        font-size: 18px;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+    
+    input[type="number"]:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .result-section {
+        display: none;
+        background: linear-gradient(135deg, #d4edda, #c3e6cb);
+        padding: 25px;
+        border-radius: 12px;
+        border-left: 5px solid #28a745;
+        margin-bottom: 30px;
+    }
+    
+    .result-item {
+        margin: 15px 0;
+        font-size: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .result-item strong {
+        color: #333;
+    }
+    
+    .amount {
+        font-size: 24px;
+        font-weight: bold;
+    }
+    
+    .tax-excluded {
+        color: #007bff;
+    }
+    
+    .tax-included {
+        color: #28a745;
+    }
+    
+    .calculation-details {
+        background: #fff3cd;
+        padding: 20px;
+        border-radius: 10px;
+        margin-top: 20px;
+        border-left: 4px solid #ffc107;
+    }
+    
+    .block-info {
+        margin: 8px 0;
+        font-size: 14px;
+        color: #495057;
+    }
+    
+    .rate-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        font-size: 14px;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .rate-table th, .rate-table td {
+        padding: 12px;
+        text-align: center;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .rate-table th {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        font-weight: bold;
+    }
+    
+    .rate-table tr:nth-child(even) {
+        background: #f8f9fa;
+    }
+    
+    .rate-table tr:hover {
+        background: #e3f2fd;
+    }
+    
+    .info-section {
+        background: #e7f3ff;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        border-left: 4px solid #2196f3;
+    }
+    
+    .info-section h3 {
+        margin-top: 0;
+        color: #1976d2;
+    }
+    
+    .highlight {
+        background: #ffeb3b;
+        padding: 2px 4px;
+        border-radius: 3px;
+    }
+</style>
+```
+
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 ブロック制ポイント計算機</h1>
+
+```
+    <div class="info-section">
+        <h3>📋 計算ルール</h3>
+        <p>• <strong>1ブロック = 500ポイント</strong></p>
+        <p>• 端数も<span class="highlight">達成済みブロックの最高レート</span>で計算されます</p>
+        <p>• パーセント適用後に<strong>120円</strong>を掛けて税抜価格を算出</p>
+        <p>• 税込価格は税抜価格に<strong>1.1倍</strong>を適用</p>
+    </div>
+    
+    <div class="input-section">
+        <label for="points">💎 ポイント数を入力してください：</label>
+        <input type="number" id="points" placeholder="例: 1750" min="0" oninput="calculateAmount()">
+    </div>
+    
+    <div id="result" class="result-section">
+        <div class="result-item">
+            <strong>🎯 達成ブロック数:</strong> 
+            <span id="blockCount" class="amount"></span>
+        </div>
+        <div class="result-item">
+            <strong>📊 適用レート:</strong> 
+            <span id="rate" class="amount"></span>%
+        </div>
+        <div class="result-item tax-excluded">
+            <strong>💰 税抜金額:</strong> 
+            <span id="taxExcluded" class="amount"></span>円
+        </div>
+        <div class="result-item tax-included">
+            <strong>💳 税込金額:</strong> 
+            <span id="taxIncluded" class="amount"></span>円
+        </div>
+        
+        <div class="calculation-details">
+            <h4>📝 計算詳細</h4>
+            <div id="calculationSteps"></div>
+        </div>
+    </div>
+    
+    <div class="info-section">
+        <h3>📊 ブロック別レート表</h3>
+        <table class="rate-table">
+            <thead>
+                <tr>
+                    <th>ブロック</th>
+                    <th>ポイント範囲</th>
+                    <th>レート (%)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>1ブロック目</td><td>1 - 500</td><td>5%</td></tr>
+                <tr><td>2ブロック目</td><td>501 - 1,000</td><td>5%</td></tr>
+                <tr><td>3ブロック目</td><td>1,001 - 1,500</td><td>10%</td></tr>
+                <tr><td>4ブロック目</td><td>1,501 - 2,000</td><td>15%</td></tr>
+                <tr><td>5ブロック目</td><td>2,001 - 2,500</td><td>20%</td></tr>
+                <tr><td>6ブロック目</td><td>2,501 - 3,000</td><td>25%</td></tr>
+                <tr><td>7ブロック目</td><td>3,001 - 3,500</td><td>30%</td></tr>
+                <tr><td>8ブロック目以降</td><td>3,501以上</td><td>35%</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // ブロック別レート設定
+    const blockRates = [
+        { block: 1, rate: 5 },   // 1ブロック目: 5%
+        { block: 2, rate: 5 },   // 2ブロック目: 5%
+        { block: 3, rate: 10 },  // 3ブロック目: 10%
+        { block: 4, rate: 15 },  // 4ブロック目: 15%
+        { block: 5, rate: 20 },  // 5ブロック目: 20%
+        { block: 6, rate: 25 },  // 6ブロック目: 25%
+        { block: 7, rate: 30 },  // 7ブロック目: 30%
+    ];
+    
+    const POINTS_PER_BLOCK = 500;
+    const BASE_AMOUNT = 120;
+    const TAX_RATE = 1.1;
+    const BLOCK_7_PLUS_RATE = 35; // 7ブロック以降のレート
+    
+    function getBlockNumber(points) {
+        return Math.floor((points - 1) / POINTS_PER_BLOCK) + 1;
+    }
+    
+    function getRateForBlock(blockNumber) {
+        if (blockNumber <= 0) return 0;
+        if (blockNumber <= blockRates.length) {
+            return blockRates[blockNumber - 1].rate;
+        }
+        return BLOCK_7_PLUS_RATE; // 7ブロック以降は35%
+    }
+    
+    function calculateAmount() {
+        const pointsInput = document.getElementById('points');
+        const points = parseInt(pointsInput.value);
+        const resultDiv = document.getElementById('result');
+        
+        if (isNaN(points) || points <= 0) {
+            resultDiv.style.display = 'none';
+            return;
+        }
+        
+        // 完全達成ブロック数を計算
+        const completedBlocks = Math.floor(points / POINTS_PER_BLOCK);
+        const remainderPoints = points % POINTS_PER_BLOCK;
+        
+        // 各ブロックごとに計算
+        let totalAmount = 0;
+        let calculationDetails = [];
+        
+        // 完全達成ブロックの計算
+        for (let block = 1; block <= completedBlocks; block++) {
+            const rate = getRateForBlock(block);
+            const blockAmount = POINTS_PER_BLOCK * (rate / 100) * BASE_AMOUNT;
+            totalAmount += blockAmount;
+            
+            calculationDetails.push({
+                block: block,
+                points: POINTS_PER_BLOCK,
+                rate: rate,
+                amount: blockAmount,
+                type: 'completed'
+            });
+        }
+        
+        // 端数の計算（達成済みブロックの最高レートを適用）
+        let remainderAmount = 0;
+        if (remainderPoints > 0 && completedBlocks > 0) {
+            const remainderRate = getRateForBlock(completedBlocks);
+            remainderAmount = remainderPoints * (remainderRate / 100) * BASE_AMOUNT;
+            totalAmount += remainderAmount;
+            
+            calculationDetails.push({
+                block: `${completedBlocks}ブロック目レート`,
+                points: remainderPoints,
+                rate: remainderRate,
+                amount: remainderAmount,
+                type: 'remainder'
+            });
+        }
+        
+        const taxExcludedAmount = Math.floor(totalAmount);
+        const taxIncludedAmount = Math.floor(taxExcludedAmount * TAX_RATE);
+        
+        // 結果表示
+        document.getElementById('blockCount').textContent = `${completedBlocks}ブロック${remainderPoints > 0 ? ' + 端数' : ''}`;
+        document.getElementById('rate').textContent = completedBlocks > 0 ? 'ブロック別' : '0';
+        document.getElementById('taxExcluded').textContent = taxExcludedAmount.toLocaleString();
+        document.getElementById('taxIncluded').textContent = taxIncludedAmount.toLocaleString();
+        
+        // 計算詳細を表示
+        const calculationSteps = document.getElementById('calculationSteps');
+        let detailsHTML = `
+            <div class="block-info">🎯 入力ポイント: <strong>${points.toLocaleString()}ポイント</strong></div>
+            <div class="block-info">📦 完全達成ブロック: <strong>${completedBlocks}ブロック</strong> (${(completedBlocks * POINTS_PER_BLOCK).toLocaleString()}ポイント)</div>
+            <div class="block-info">📊 端数ポイント: <strong>${remainderPoints}ポイント</strong> ${remainderPoints > 0 && completedBlocks > 0 ? `(${getRateForBlock(completedBlocks)}%で計算)` : remainderPoints > 0 ? '(達成ブロックなしのため計算対象外)' : ''}</div>
+            <br>
+            <div style="font-weight: bold; color: #495057;">🧮 ブロック別計算詳細:</div>
+        `;
+        
+        if (completedBlocks === 0 && remainderPoints > 0) {
+            detailsHTML += '<div class="block-info">⚠️ 完全達成ブロックがないため、端数も計算対象外です</div>';
+        } else if (completedBlocks === 0) {
+            detailsHTML += '<div class="block-info">⚠️ ポイントが入力されていません</div>';
+        } else {
+            calculationDetails.forEach(detail => {
+                if (detail.type === 'completed') {
+                    detailsHTML += `
+                        <div class="block-info">
+                            📋 ${detail.block}ブロック目: ${detail.points}ポイント × ${detail.rate}% × ${BASE_AMOUNT}円 = <strong>${Math.floor(detail.amount).toLocaleString()}円</strong>
+                        </div>
+                    `;
+                } else if (detail.type === 'remainder') {
+                    detailsHTML += `
+                        <div class="block-info" style="color: #ff6b35;">
+                            📊 端数計算: ${detail.points}ポイント × ${detail.rate}% × ${BASE_AMOUNT}円 = <strong>${Math.floor(detail.amount).toLocaleString()}円</strong>
+                        </div>
+                    `;
+                }
+            });
+            
+            detailsHTML += `
+                <br>
+                <div class="block-info">💰 合計税抜: <strong>${taxExcludedAmount.toLocaleString()}円</strong></div>
+                <div class="block-info">💳 税込計算: ${taxExcludedAmount.toLocaleString()}円 × ${TAX_RATE} = <strong>${taxIncludedAmount.toLocaleString()}円</strong></div>
+            `;
+        }
+        
+        calculationSteps.innerHTML = detailsHTML;
+        resultDiv.style.display = 'block';
+    }
+</script>
+```
+
+</body>
+</body>
+</html>
