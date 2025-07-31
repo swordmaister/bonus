@@ -226,8 +226,7 @@
                 <tr><td>4ブロック目</td><td>1,501 - 2,000</td><td>15%</td></tr>
                 <tr><td>5ブロック目</td><td>2,001 - 2,500</td><td>20%</td></tr>
                 <tr><td>6ブロック目</td><td>2,501 - 3,000</td><td>25%</td></tr>
-                <tr><td>7ブロック目</td><td>3,001 - 3,500</td><td>30%</td></tr>
-                <tr><td>8ブロック目以降</td><td>3,501以上</td><td>35%</td></tr>
+                <tr><td>7ブロック目以降</td><td>3,001以上</td><td>30%</td></tr>
             </tbody>
         </table>
     </div>
@@ -248,7 +247,7 @@
     const POINTS_PER_BLOCK = 500;
     const BASE_AMOUNT = 120;
     const TAX_RATE = 1.1;
-    const BLOCK_7_PLUS_RATE = 35; // 7ブロック以降のレート
+    const MAX_RATE = 30; // 7ブロック目以降は30%で固定
     
     function getBlockNumber(points) {
         return Math.floor((points - 1) / POINTS_PER_BLOCK) + 1;
@@ -259,7 +258,7 @@
         if (blockNumber <= blockRates.length) {
             return blockRates[blockNumber - 1].rate;
         }
-        return BLOCK_7_PLUS_RATE; // 7ブロック以降は35%
+        return MAX_RATE; // 7ブロック以降は30%で固定
     }
     
     function calculateAmount() {
