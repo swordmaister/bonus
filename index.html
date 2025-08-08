@@ -7,7 +7,7 @@
     <title>ブロック制ポイント計算機</title>
     <style>
         body {
-            font-family: 'Hiragino Sans', 'Meiryo', sans-serif;
+            font-family: 'Hiragino Sans', 'Meiryo', 'MS PGothic', sans-serif;
             max-width: 600px;
             margin: 0 auto;
             padding: 20px;
@@ -211,8 +211,22 @@
     .close-button:hover {
         background: #5a6268;
     }
+    
+    .investment-summary {
+        background: #e8f5e8;
+        padding: 15px;
+        border-radius: 10px;
+        margin: 15px 0;
+        text-align: center;
+    }
+    
+    .investment-item {
+        margin: 10px 0;
+        font-size: 16px;
+        font-weight: bold;
+        color: #28a745;
+    }
 </style>
-
 
 </head>
 <body>
@@ -252,6 +266,7 @@
         <div>
             <button class="toggle-button" onclick="toggleDetails()">📊 計算詳細</button>
             <button class="toggle-button" onclick="toggleRateTable()">📋 レート表</button>
+            <button class="toggle-button" onclick="toggleInvestment()">💎 必要資産価値</button>
         </div>
     </div>
     
@@ -285,6 +300,27 @@
             </tbody>
         </table>
     </div>
+    
+    <div id="investmentSection" class="details-section">
+        <button class="close-button" onclick="hideInvestment()">✕</button>
+        <h3>💎 必要資産価値</h3>
+        <p><strong>年利5%で同等収益を生む資産価値</strong></p>
+        
+        <div class="investment-summary">
+            <div class="investment-item">
+                <strong>月収入:</strong> <span id="monthlyIncome"></span>円
+            </div>
+            <div class="investment-item">
+                <strong>年収入:</strong> <span id="annualIncome"></span>円
+            </div>
+            <div class="investment-item" style="color: #dc3545; font-size: 20px;">
+                <strong>必要資産価値:</strong> <span id="requiredAssets"></span>円
+            </div>
+            <div class="investment-item" style="font-size: 14px; color: #666; margin-top: 15px;">
+                ※年利5%で月<span id="monthlyIncomeRepeat"></span>円の収益を得るのに必要な元本額
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -295,7 +331,7 @@
         { block: 4, rate: 15 },
         { block: 5, rate: 20 },
         { block: 6, rate: 25 },
-        { block: 7, rate: 30 },
+        { block: 7, rate: 30 }
     ];
     
     const POINTS_PER_BLOCK = 500;
@@ -384,13 +420,14 @@
         } else if (completedBlocks === 0) {
             detailsHTML += '<div class="block-info">⚠️ ポイントが入力されていません</div>';
         } else {
-            calculationDetails.forEach(detail => {
+            for (let i = 0; i < calculationDetails.length; i++) {
+                const detail = calculationDetails[i];
                 if (detail.type === 'completed') {
                     detailsHTML += '<div class="block-info">📋 ' + detail.block + 'ブロック目: ' + detail.points + 'pt × ' + detail.rate + '% × ' + BASE_AMOUNT + '円 = <strong>' + Math.floor(detail.amount).toLocaleString() + '円</strong></div>';
                 } else if (detail.type === 'remainder') {
                     detailsHTML += '<div class="block-info" style="color: #ff6b35;">📊 端数計算: ' + detail.points + 'pt × ' + detail.rate + '% × ' + BASE_AMOUNT + '円 = <strong>' + Math.floor(detail.amount).toLocaleString() + '円</strong></div>';
                 }
-            });
+            }
             
             detailsHTML += '<br><div class="block-info">💰 合計税抜: <strong>' + taxExcludedAmount.toLocaleString() + '円</strong></div>';
             detailsHTML += '<div class="block-info">💳 税込計算: ' + taxExcludedAmount.toLocaleString() + '円 × ' + TAX_RATE + ' = <strong>' + taxIncludedAmount.toLocaleString() + '円</strong></div>';
@@ -398,29 +435,50 @@
         
         document.getElementById('calculationSteps').innerHTML = detailsHTML;
         resultDiv.style.display = 'block';
+        
+        // 資産シミュレーション用の月額を計算
+        updateInvestmentSimulation(taxIncludedAmount);
     }
     
     function toggleDetails() {
         const details = document.getElementById('calculationDetails');
         const rateTable = document.getElementById('rateTableSection');
+        const investment = document.getElementById('investmentSection');
         
         if (details.style.display === 'block') {
             details.style.display = 'none';
         } else {
             details.style.display = 'block';
             rateTable.style.display = 'none';
+            investment.style.display = 'none';
         }
     }
     
     function toggleRateTable() {
         const rateTable = document.getElementById('rateTableSection');
         const details = document.getElementById('calculationDetails');
+        const investment = document.getElementById('investmentSection');
         
         if (rateTable.style.display === 'block') {
             rateTable.style.display = 'none';
         } else {
             rateTable.style.display = 'block';
             details.style.display = 'none';
+            investment.style.display = 'none';
+        }
+    }
+    
+    function toggleInvestment() {
+        const investment = document.getElementById('investmentSection');
+        const details = document.getElementById('calculationDetails');
+        const rateTable = document.getElementById('rateTableSection');
+        
+        if (investment.style.display === 'block') {
+            investment.style.display = 'none';
+        } else {
+            investment.style.display = 'block';
+            details.style.display = 'none';
+            rateTable.style.display = 'none';
         }
     }
     
@@ -430,6 +488,25 @@
     
     function hideRateTable() {
         document.getElementById('rateTableSection').style.display = 'none';
+    }
+    
+    function hideInvestment() {
+        document.getElementById('investmentSection').style.display = 'none';
+    }
+    
+    // 必要資産価値計算
+    function updateInvestmentSimulation(monthlyAmount) {
+        const annualRate = 5; // 年利5%
+        
+        // 必要資産価値を計算（月収入を年利5%で得るのに必要な元本）
+        const monthlyIncome = monthlyAmount;
+        const annualIncome = monthlyIncome * 12;
+        const requiredAssets = Math.floor(annualIncome / (annualRate / 100));
+        
+        document.getElementById('monthlyIncome').textContent = monthlyIncome.toLocaleString();
+        document.getElementById('annualIncome').textContent = annualIncome.toLocaleString();
+        document.getElementById('monthlyIncomeRepeat').textContent = monthlyIncome.toLocaleString();
+        document.getElementById('requiredAssets').textContent = requiredAssets.toLocaleString();
     }
     
     function addPoints(amount) {
