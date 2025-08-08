@@ -537,7 +537,7 @@
         
         // BAB計算詳細
         if (var5 > 0 || var10 > 0 || var2_5 > 0) {
-            detailsHTML += '<div style="font-weight: bold; color: #495057;">📊 変数計算:</div>';
+            detailsHTML += '<div style="font-weight: bold; color: #495057;">📊 BAB計算:</div>';
             if (var5 > 0) {
                 detailsHTML += '<div class="block-info">🔹 5%: ' + var5.toLocaleString() + ' × 5% × ' + BASE_AMOUNT + '円 = <strong>' + Math.floor(var5Amount).toLocaleString() + '円</strong></div>';
             }
@@ -547,7 +547,7 @@
             if (var2_5 > 0) {
                 detailsHTML += '<div class="block-info">🔹 2.5%: ' + var2_5.toLocaleString() + ' × 2.5% × ' + BASE_AMOUNT + '円 = <strong>' + Math.floor(var2_5Amount).toLocaleString() + '円</strong></div>';
             }
-            detailsHTML += '<div class="block-info">📊 変数小計: <strong>' + Math.floor(variableTaxExcluded).toLocaleString() + '円</strong></div><br>';
+            detailsHTML += '<div class="block-info">📊 BAB小計: <strong>' + Math.floor(variableTaxExcluded).toLocaleString() + '円</strong></div><br>';
         }
         
         // 合計
