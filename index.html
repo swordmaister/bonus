@@ -332,7 +332,7 @@
             <strong>ブロック税抜:</strong> <span id="blockTaxExcluded"></span>円
         </div>
         <div class="result-item">
-            <strong>変数税抜:</strong> <span id="variableTaxExcluded"></span>円
+            <strong>BAB税抜:</strong> <span id="variableTaxExcluded"></span>円
         </div>
         <div class="result-item main tax-excluded">
             合計税抜: <span id="taxExcluded"></span>円
@@ -535,17 +535,17 @@
             }
         }
         
-        // 変数計算詳細
+        // BAB計算詳細
         if (var5 > 0 || var10 > 0 || var2_5 > 0) {
             detailsHTML += '<div style="font-weight: bold; color: #495057;">📊 変数計算:</div>';
             if (var5 > 0) {
-                detailsHTML += '<div class="block-info">🔹 5%変数: ' + var5.toLocaleString() + ' × 5% × ' + BASE_AMOUNT + '円 = <strong>' + Math.floor(var5Amount).toLocaleString() + '円</strong></div>';
+                detailsHTML += '<div class="block-info">🔹 5%: ' + var5.toLocaleString() + ' × 5% × ' + BASE_AMOUNT + '円 = <strong>' + Math.floor(var5Amount).toLocaleString() + '円</strong></div>';
             }
             if (var10 > 0) {
-                detailsHTML += '<div class="block-info">🔹 10%変数: ' + var10.toLocaleString() + ' × 10% × ' + BASE_AMOUNT + '円 = <strong>' + Math.floor(var10Amount).toLocaleString() + '円</strong></div>';
+                detailsHTML += '<div class="block-info">🔹 10%: ' + var10.toLocaleString() + ' × 10% × ' + BASE_AMOUNT + '円 = <strong>' + Math.floor(var10Amount).toLocaleString() + '円</strong></div>';
             }
             if (var2_5 > 0) {
-                detailsHTML += '<div class="block-info">🔹 2.5%変数: ' + var2_5.toLocaleString() + ' × 2.5% × ' + BASE_AMOUNT + '円 = <strong>' + Math.floor(var2_5Amount).toLocaleString() + '円</strong></div>';
+                detailsHTML += '<div class="block-info">🔹 2.5%: ' + var2_5.toLocaleString() + ' × 2.5% × ' + BASE_AMOUNT + '円 = <strong>' + Math.floor(var2_5Amount).toLocaleString() + '円</strong></div>';
             }
             detailsHTML += '<div class="block-info">📊 変数小計: <strong>' + Math.floor(variableTaxExcluded).toLocaleString() + '円</strong></div><br>';
         }
