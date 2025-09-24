@@ -112,7 +112,6 @@
     }
     
     .result-section {
-        display: none;
         margin: 30px 0;
     }
     
@@ -124,7 +123,13 @@
     .result-item.main {
         font-size: 28px;
         font-weight: bold;
-        margin: 30px 0;
+        margin: 10px 0;
+        white-space: nowrap; /* 金額と単位を改行させない */
+    }
+
+    .result-item.main span {
+        font-size: 28px;
+        font-weight: bold;
     }
     
     .tax-excluded {
@@ -278,18 +283,91 @@
         border-color: #1565c0;
         outline: none;
     }
+    
+    #result-container {
+      min-height: 150px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    #result.result-section {
+      display: block !important;
+      margin: 0;
+      width: 100%;
+    }
+    
+    .toggle-op-button {
+      border: none;
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(245, 127, 23, 0.3);
+      min-width: 120px; /* ボタンの幅を固定 */
+    }
+
+    .toggle-op-button.plus-mode {
+        background: linear-gradient(135deg, #1565c0, #0d47a1);
+        color: white;
+    }
+
+    .toggle-op-button.minus-mode {
+        background: linear-gradient(135deg, #d32f2f, #b71c1c);
+        color: white;
+    }
+    
+    .toggle-op-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245, 127, 23, 0.4);
+    }
+
+    .bab-results {
+        margin-top: 20px;
+        padding: 15px;
+        background: #e8f8f8;
+        border: 1px solid #b2e8e8;
+        border-radius: 10px;
+        text-align: left;
+    }
+
+    .bab-results p {
+        margin: 5px 0;
+    }
+
+    .bab-results .bab-title {
+        font-weight: bold;
+        color: #00796b;
+    }
+    
     </style>
 
 </head>
 <body>
     <div class="container">
         <h1>🎯 ポイント計算機</h1>
+        
+        <div id="result-container">
+            <div id="result" class="result-section">
+                <div class="result-item main tax-excluded">
+                    <div style="font-size: 16px; font-weight: normal;">ブロック計算（税抜）</div>
+                    <span id="blockTaxExcluded">0</span>円
+                </div>
+                <div class="result-item main tax-included">
+                    <div style="font-size: 16px; font-weight: normal;">ブロック計算（税込）</div>
+                    <span id="blockTaxIncluded">0</span>円
+                </div>
+            </div>
+        </div>
 
 
     <div class="input-section">
         <input type="number" id="points" placeholder="ポイント数を入力" min="0" max="99999999" oninput="calculateAmount()">
         
-        <div class="quick-buttons">
+        <div class="quick-buttons" id="quickButtons">
             <button class="quick-button" onclick="addPoints(1000)">+1000</button>
             <button class="quick-button" onclick="addPoints(500)">+500</button>
             <button class="quick-button" onclick="addPoints(100)">+100</button>
@@ -300,6 +378,7 @@
         </div>
         
         <div class="control-buttons">
+            <button class="toggle-op-button plus-mode" id="toggleButton" onclick="toggleOperation()">プラス</button>
             <button class="control-button" onclick="clearPoints()">🗑️ クリア</button>
             <button class="control-button" onclick="setRoundNumber()">📦 きりの良い数</button>
         </div>
@@ -321,31 +400,22 @@
                 </div>
             </div>
             <button class="control-button" onclick="clearVariables()">🧹 BABクリア</button>
+            <div class="bab-results">
+                <p class="bab-title">BAB合計金額</p>
+                <p>税抜: <span id="variableTaxExcluded">0</span>円</p>
+                <p>税込: <span id="variableTaxIncluded">0</span>円</p>
+                <br>
+                <p class="bab-title">合計（ブロック＋BAB）</p>
+                <p>税抜: <span id="totalTaxExcluded">0</span>円</p>
+                <p>税込: <span id="totalTaxIncluded">0</span>円</p>
+            </div>
         </div>
     </div>
     
-    <div id="result" class="result-section">
-        <div class="result-item">
-            <strong>達成ブロック:</strong> <span id="blockCount"></span>
-        </div>
-        <div class="result-item">
-            <strong>ブロック税抜:</strong> <span id="blockTaxExcluded"></span>円
-        </div>
-        <div class="result-item">
-            <strong>BAB税抜:</strong> <span id="variableTaxExcluded"></span>円
-        </div>
-        <div class="result-item main tax-excluded">
-            合計税抜: <span id="taxExcluded"></span>円
-        </div>
-        <div class="result-item main tax-included">
-            合計税込: <span id="taxIncluded"></span>円
-        </div>
-        
-        <div>
-            <button class="toggle-button" onclick="toggleDetails()">📊 計算詳細</button>
-            <button class="toggle-button" onclick="toggleRateTable()">📋 レート表</button>
-            <button class="toggle-button" onclick="toggleInvestment()">💎 必要資産価値</button>
-        </div>
+    <div style="margin-top: 30px;">
+        <button class="toggle-button" onclick="toggleDetails()">📊 計算詳細</button>
+        <button class="toggle-button" onclick="toggleRateTable()">📋 レート表</button>
+        <button class="toggle-button" onclick="toggleInvestment()">💎 必要資産価値</button>
     </div>
     
     <div id="calculationDetails" class="details-section">
@@ -417,6 +487,8 @@
     const TAX_RATE = 1.1;
     const MAX_RATE = 30;
     
+    let isAdding = true; // プラス/マイナス切り替え用
+
     function getBlockNumber(points) {
         return Math.floor((points - 1) / POINTS_PER_BLOCK) + 1;
     }
@@ -431,61 +503,46 @@
     
     function calculateAmount() {
         const pointsInput = document.getElementById('points');
-        const points = parseInt(pointsInput.value);
-        const resultDiv = document.getElementById('result');
+        const points = parseInt(pointsInput.value) || 0;
         
         // 変数の取得
         const var5 = parseInt(document.getElementById('var5').value) || 0;
         const var10 = parseInt(document.getElementById('var10').value) || 0;
         const var2_5 = parseInt(document.getElementById('var2_5').value) || 0;
         
-        if ((isNaN(points) || points <= 0) && var5 === 0 && var10 === 0 && var2_5 === 0) {
-            resultDiv.style.display = 'none';
-            hideDetails();
-            hideRateTable();
-            hideInvestment();
-            return;
-        }
-        
         let blockTaxExcluded = 0;
         let calculationDetails = [];
         
-        // ブロック計算（ポイントが入力されている場合のみ）
-        if (!isNaN(points) && points > 0) {
-            const completedBlocks = Math.floor(points / POINTS_PER_BLOCK);
-            const remainderPoints = points % POINTS_PER_BLOCK;
+        // ブロック計算
+        const completedBlocks = Math.floor(points / POINTS_PER_BLOCK);
+        const remainderPoints = points % POINTS_PER_BLOCK;
             
-            for (let block = 1; block <= completedBlocks; block++) {
-                const rate = getRateForBlock(block);
-                const blockAmount = POINTS_PER_BLOCK * (rate / 100) * BASE_AMOUNT;
-                blockTaxExcluded += blockAmount;
-                
-                calculationDetails.push({
-                    block: block,
-                    points: POINTS_PER_BLOCK,
-                    rate: rate,
-                    amount: blockAmount,
-                    type: 'completed'
-                });
-            }
+        for (let block = 1; block <= completedBlocks; block++) {
+            const rate = getRateForBlock(block);
+            const blockAmount = POINTS_PER_BLOCK * (rate / 100) * BASE_AMOUNT;
+            blockTaxExcluded += blockAmount;
             
-            if (remainderPoints > 0 && completedBlocks > 0) {
-                const remainderRate = getRateForBlock(completedBlocks);
-                const remainderAmount = remainderPoints * (remainderRate / 100) * BASE_AMOUNT;
-                blockTaxExcluded += remainderAmount;
-                
-                calculationDetails.push({
-                    block: completedBlocks + 'ブロック目レート',
-                    points: remainderPoints,
-                    rate: remainderRate,
-                    amount: remainderAmount,
-                    type: 'remainder'
-                });
-            }
+            calculationDetails.push({
+                block: block,
+                points: POINTS_PER_BLOCK,
+                rate: rate,
+                amount: blockAmount,
+                type: 'completed'
+            });
+        }
+        
+        if (remainderPoints > 0 && completedBlocks > 0) {
+            const remainderRate = getRateForBlock(completedBlocks);
+            const remainderAmount = remainderPoints * (remainderRate / 100) * BASE_AMOUNT;
+            blockTaxExcluded += remainderAmount;
             
-            document.getElementById('blockCount').textContent = completedBlocks + 'ブロック' + (remainderPoints > 0 ? ' + 端数' : '');
-        } else {
-            document.getElementById('blockCount').textContent = '0ブロック';
+            calculationDetails.push({
+                block: completedBlocks + 'ブロック目レート',
+                points: remainderPoints,
+                rate: remainderRate,
+                amount: remainderAmount,
+                type: 'remainder'
+            });
         }
         
         // 変数計算
@@ -498,43 +555,52 @@
         const totalTaxExcluded = Math.floor(blockTaxExcluded + variableTaxExcluded);
         const totalTaxIncluded = Math.floor(totalTaxExcluded * TAX_RATE);
         
+        const blockTaxIncluded = Math.floor(blockTaxExcluded * TAX_RATE);
+        const variableTaxIncluded = Math.floor(variableTaxExcluded * TAX_RATE);
+
         // 結果表示
         document.getElementById('blockTaxExcluded').textContent = Math.floor(blockTaxExcluded).toLocaleString();
-        document.getElementById('variableTaxExcluded').textContent = Math.floor(variableTaxExcluded).toLocaleString();
-        document.getElementById('taxExcluded').textContent = totalTaxExcluded.toLocaleString();
-        document.getElementById('taxIncluded').textContent = totalTaxIncluded.toLocaleString();
+        document.getElementById('blockTaxIncluded').textContent = blockTaxIncluded.toLocaleString();
         
-        // 計算詳細を準備
+        document.getElementById('variableTaxExcluded').textContent = Math.floor(variableTaxExcluded).toLocaleString();
+        document.getElementById('variableTaxIncluded').textContent = variableTaxIncluded.toLocaleString();
+        
+        document.getElementById('totalTaxExcluded').textContent = totalTaxExcluded.toLocaleString();
+        document.getElementById('totalTaxIncluded').textContent = totalTaxIncluded.toLocaleString();
+        
+        // 詳細セクションの更新
+        updateCalculationDetails(points, completedBlocks, remainderPoints, blockTaxExcluded, var5, var10, var2_5, var5Amount, var10Amount, var2_5Amount, variableTaxExcluded, totalTaxExcluded, totalTaxIncluded, calculationDetails);
+        
+        // 必要資産価値計算
+        updateInvestmentSimulation(totalTaxIncluded);
+    }
+    
+    function updateCalculationDetails(points, completedBlocks, remainderPoints, blockTaxExcluded, var5, var10, var2_5, var5Amount, var10Amount, var2_5Amount, variableTaxExcluded, totalTaxExcluded, totalTaxIncluded, calculationDetails) {
         let detailsHTML = '';
         
         // ブロック計算詳細
-        if (!isNaN(points) && points > 0) {
-            detailsHTML += '<div class="block-info">🎯 入力ポイント: <strong>' + points.toLocaleString() + 'ポイント</strong></div>';
-            const completedBlocks = Math.floor(points / POINTS_PER_BLOCK);
-            const remainderPoints = points % POINTS_PER_BLOCK;
-            detailsHTML += '<div class="block-info">📦 完全達成ブロック: <strong>' + completedBlocks + 'ブロック</strong> (' + (completedBlocks * POINTS_PER_BLOCK).toLocaleString() + 'ポイント)</div>';
-            detailsHTML += '<div class="block-info">📊 端数ポイント: <strong>' + remainderPoints + 'ポイント</strong>';
-            if (remainderPoints > 0 && completedBlocks > 0) {
-                detailsHTML += ' (' + getRateForBlock(completedBlocks) + '%で計算)';
-            } else if (remainderPoints > 0) {
-                detailsHTML += ' (達成ブロックなしのため計算対象外)';
-            }
-            detailsHTML += '</div><br>';
-            
-            if (completedBlocks > 0 || remainderPoints > 0) {
-                detailsHTML += '<div style="font-weight: bold; color: #495057;">🧮 ブロック別計算:</div>';
-                for (let i = 0; i < calculationDetails.length; i++) {
-                    const detail = calculationDetails[i];
-                    if (detail.type === 'completed') {
-                        detailsHTML += '<div class="block-info">📋 ' + detail.block + 'ブロック目: ' + detail.points + 'pt × ' + detail.rate + '% × ' + BASE_AMOUNT + '円 = <strong>' + Math.floor(detail.amount).toLocaleString() + '円</strong></div>';
-                    } else if (detail.type === 'remainder') {
-                        detailsHTML += '<div class="block-info" style="color: #ff6b35;">📊 端数計算: ' + detail.points + 'pt × ' + detail.rate + '% × ' + BASE_AMOUNT + '円 = <strong>' + Math.floor(detail.amount).toLocaleString() + '円</strong></div>';
-                    }
-                }
-                detailsHTML += '<div class="block-info">💰 ブロック小計: <strong>' + Math.floor(blockTaxExcluded).toLocaleString() + '円</strong></div><br>';
-            }
+        detailsHTML += '<div class="block-info">🎯 入力ポイント: <strong>' + points.toLocaleString() + 'ポイント</strong></div>';
+        detailsHTML += '<div class="block-info">📦 完全達成ブロック: <strong>' + completedBlocks + 'ブロック</strong> (' + (completedBlocks * POINTS_PER_BLOCK).toLocaleString() + 'ポイント)</div>';
+        detailsHTML += '<div class="block-info">📊 端数ポイント: <strong>' + remainderPoints + 'ポイント</strong>';
+        if (remainderPoints > 0 && completedBlocks > 0) {
+            detailsHTML += ' (' + getRateForBlock(completedBlocks) + '%で計算)';
+        } else if (remainderPoints > 0) {
+            detailsHTML += ' (達成ブロックなしのため計算対象外)';
         }
+        detailsHTML += '</div><br>';
         
+        if (completedBlocks > 0 || remainderPoints > 0) {
+            detailsHTML += '<div style="font-weight: bold; color: #495057;">🧮 ブロック別計算:</div>';
+            for (const detail of calculationDetails) {
+                if (detail.type === 'completed') {
+                    detailsHTML += '<div class="block-info">📋 ' + detail.block + 'ブロック目: ' + detail.points + 'pt × ' + detail.rate + '% × ' + BASE_AMOUNT + '円 = <strong>' + Math.floor(detail.amount).toLocaleString() + '円</strong></div>';
+                } else if (detail.type === 'remainder') {
+                    detailsHTML += '<div class="block-info" style="color: #ff6b35;">📊 端数計算: ' + detail.points + 'pt × ' + detail.rate + '% × ' + BASE_AMOUNT + '円 = <strong>' + Math.floor(detail.amount).toLocaleString() + '円</strong></div>';
+                }
+            }
+            detailsHTML += '<div class="block-info">💰 ブロック小計: <strong>' + Math.floor(blockTaxExcluded).toLocaleString() + '円</strong></div><br>';
+        }
+
         // BAB計算詳細
         if (var5 > 0 || var10 > 0 || var2_5 > 0) {
             detailsHTML += '<div style="font-weight: bold; color: #495057;">📊 BAB計算:</div>';
@@ -555,10 +621,6 @@
         detailsHTML += '<div class="block-info">💳 税込計算: ' + totalTaxExcluded.toLocaleString() + '円 × ' + TAX_RATE + ' = <strong>' + totalTaxIncluded.toLocaleString() + '円</strong></div>';
         
         document.getElementById('calculationSteps').innerHTML = detailsHTML;
-        resultDiv.style.display = 'block';
-        
-        // 必要資産価値計算
-        updateInvestmentSimulation(totalTaxIncluded);
     }
     
     function toggleDetails() {
@@ -632,9 +694,45 @@
     
     function addPoints(amount) {
         const pointsInput = document.getElementById('points');
-        const currentValue = parseInt(pointsInput.value) || 0;
-        pointsInput.value = currentValue + amount;
+        let currentValue = parseInt(pointsInput.value) || 0;
+        
+        if (!isAdding) {
+            amount = -amount; // マイナスモードの場合は減算
+        }
+        
+        currentValue += amount;
+        if (currentValue < 0) {
+            currentValue = 0; // 0未満にはならないようにする
+        }
+        
+        pointsInput.value = currentValue;
         calculateAmount();
+    }
+    
+    function toggleOperation() {
+        isAdding = !isAdding;
+        const buttons = document.querySelectorAll('.quick-button');
+        const toggleButton = document.getElementById('toggleButton');
+
+        buttons.forEach(button => {
+            const currentText = button.textContent;
+            const number = currentText.substring(1);
+            if (isAdding) {
+                button.textContent = '+' + number;
+            } else {
+                button.textContent = '-' + number;
+            }
+        });
+        
+        if (isAdding) {
+            toggleButton.textContent = 'プラス';
+            toggleButton.classList.remove('minus-mode');
+            toggleButton.classList.add('plus-mode');
+        } else {
+            toggleButton.textContent = 'マイナス';
+            toggleButton.classList.remove('plus-mode');
+            toggleButton.classList.add('minus-mode');
+        }
     }
     
     function clearPoints() {
@@ -657,6 +755,11 @@
         document.getElementById('var2_5').value = '';
         calculateAmount();
     }
+
+    // ページ読み込み時に計算を実行して初期値を表示
+    document.addEventListener('DOMContentLoaded', (event) => {
+        calculateAmount();
+    });
 </script>
 
 
