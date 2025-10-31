@@ -1,475 +1,664 @@
 <!DOCTYPE html>
-
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ポイント計算(Oct2025)</title>
+    <title>ポイント収益シミュレーター (Oct 2025)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Noto+Sans+JP:wght{300;400;700}&display=swap" rel="stylesheet">
     <style>
-              html {
-      touch-action: manipulation;
+        /* CSSリセットとベース設定 */
+        html {
+            touch-action: manipulation;
+            box-sizing: border-box;
+        }
+        *, *::before, *::after {
+            box-sizing: inherit;
         }
         body {
-            font-family: 'Hiragino Sans', 'Meiryo', 'MS PGothic', sans-serif;
-            max-width: 600px;
+            font-family: 'Roboto', 'Noto Sans JP', sans-serif;
+            max-width: 720px;
             margin: 0 auto;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 0;
+            background-color: #f4f6f8;
             min-height: 100vh;
+            color: #333;
         }
 
+        /* メインコンテナ - レスポンシブ調整 */
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            margin: 20px;
+            margin-left: 10px; 
+            margin-right: 10px;
+        }
+        
+        /* タイトル */
+        h1 {
+            color: #004d99;
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
 
-    .container {
-        background: white;
-        border-radius: 20px;
-        padding: 40px;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-        text-align: center;
-    }
-    
-    h1 {
-        color: #333;
-        margin-bottom: 40px;
-        font-size: 2.2rem;
-        font-weight: 300;
-    }
-    
-    .input-section {
-        margin-bottom: 30px;
-    }
-    
-    input[type="number"] {
-        width: 200px;
-        max-width: 90%;
-        padding: 15px 20px;
-        border: 2px solid #e1e5e9;
-        border-radius: 50px;
-        font-size: 18px;
-        text-align: center;
-        transition: all 0.3s ease;
-        outline: none;
-    }
-    
-    input[type="number"]:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-    
-    .quick-buttons {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 8px;
-        margin-top: 20px;
-    }
-    
-    .quick-button {
-        background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-        color: #1565c0;
-        border: 2px solid #90caf9;
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-size: 14px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        min-width: 50px;
-    }
-    
-    .quick-button:hover {
-        background: linear-gradient(135deg, #bbdefb, #90caf9);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(21, 101, 192, 0.3);
-    }
-    
-    .quick-button:active {
-        transform: translateY(0);
-    }
-    
-    .control-buttons {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        margin-top: 15px;
-    }
-    
-    .control-button {
-        background: linear-gradient(135deg, #ffecb3, #ffe082);
-        color: #f57f17;
-        border: 2px solid #ffcc02;
-        padding: 8px 12px;
-        border-radius: 20px;
-        font-size: 13px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-    
-    .control-button:hover {
-        background: linear-gradient(135deg, #ffe082, #ffd54f);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(245, 127, 23, 0.3);
-    }
-    
-    .result-section {
-        margin: 30px 0;
-    }
-    
-    .result-item {
-        margin: 20px 0;
-        font-size: 20px;
-    }
-    
-    .result-item.main {
-        font-size: 28px;
-        font-weight: bold;
-        margin: 10px 0;
-        white-space: nowrap; /* 金額と単位を改行させない */
-    }
+        /* 結果表示セクション */
+        #result-container {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px 10px;
+            margin-bottom: 25px;
+            background: #f7f9fb;
+        }
+        
+        .result-item {
+            margin: 15px 0;
+            font-size: 16px;
+        }
+        
+        .result-item.main {
+            font-size: 2.2rem;
+            font-weight: 700;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
 
-    .result-item.main span {
-        font-size: 28px;
-        font-weight: bold;
-    }
-    
-    .tax-excluded {
-        color: #007bff;
-    }
-    
-    .tax-included {
-        color: #28a745;
-    }
-    
-    .toggle-button {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: white;
-        border: none;
-        padding: 12px 24px;
-        border-radius: 25px;
-        font-size: 16px;
-        cursor: pointer;
-        margin: 20px 10px;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-    }
-    
-    .toggle-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-    }
-    
-    .details-section {
-        display: none;
-        background: #f8f9fa;
-        padding: 25px;
-        border-radius: 15px;
-        margin-top: 20px;
-        text-align: left;
-        animation: fadeIn 0.3s ease;
-    }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .block-info {
-        margin: 8px 0;
-        font-size: 14px;
-        color: #495057;
-    }
-    
-    .rate-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 15px;
-        font-size: 14px;
-        background: white;
-        border-radius: 8px;
-        overflow: hidden;
-    }
-    
-    .rate-table th, .rate-table td {
-        padding: 10px;
-        text-align: center;
-        border-bottom: 1px solid #dee2e6;
-    }
-    
-    .rate-table th {
-        background: #667eea;
-        color: white;
-        font-weight: bold;
-    }
-    
-    .rate-table tr:nth-child(even) {
-        background: #f8f9fa;
-    }
-    
-    .close-button {
-        background: #6c757d;
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-size: 14px;
-        cursor: pointer;
-        float: right;
-        margin-bottom: 10px;
-    }
-    
-    .close-button:hover {
-        background: #5a6268;
-    }
-    
-    .investment-summary {
-        background: #e8f5e8;
-        padding: 15px;
-        border-radius: 10px;
-        margin: 15px 0;
-        text-align: center;
-    }
-    
-    .investment-item {
-        margin: 10px 0;
-        font-size: 16px;
-        font-weight: bold;
-        color: #28a745;
-    }
-    
-    .variable-section {
-        margin-top: 25px;
-        padding: 20px;
-        background: #f0f8ff;
-        border-radius: 15px;
-        border: 2px solid #b3d9ff;
-    }
-    
-    .variable-section h4 {
-        margin: 0 0 15px 0;
-        color: #1565c0;
-        font-size: 16px;
-    }
-    
-    .variable-inputs {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 10px;
-        margin-bottom: 15px;
-    }
-    
-    .variable-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .variable-item label {
-        font-size: 14px;
-        font-weight: bold;
-        color: #1565c0;
-        margin-bottom: 5px;
-    }
-    
-    .variable-item input {
-        width: 120px;
-        padding: 8px;
-        border: 2px solid #b3d9ff;
-        border-radius: 10px;
-        text-align: center;
-        font-size: 14px;
-    }
-    
-    .variable-item input:focus {
-        border-color: #1565c0;
-        outline: none;
-    }
-    
-    #result-container {
-      min-height: 150px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-    
-    #result.result-section {
-      display: block !important;
-      margin: 0;
-      width: 100%;
-    }
-    
-    .toggle-op-button {
-      border: none;
-      padding: 10px 20px;
-      border-radius: 25px;
-      font-size: 14px;
-      cursor: pointer;
-      margin-top: 10px;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(245, 127, 23, 0.3);
-      min-width: 120px; /* ボタンの幅を固定 */
-    }
+        .result-item.main span {
+            font-size: 2.2rem;
+            font-weight: 700;
+        }
+        
+        .result-label {
+            font-size: 0.8rem;
+            font-weight: 300;
+            color: #666;
+            margin-bottom: 5px;
+            display: block;
+        }
+        
+        .tax-excluded {
+            color: #007bff;
+        }
+        
+        .tax-included {
+            color: #28a745;
+        }
 
-    .toggle-op-button.plus-mode {
-        background: linear-gradient(135deg, #1565c0, #0d47a1);
-        color: white;
-    }
+        /* 入力セクション */
+        .input-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 20px;
+            text-align: center;
+            transition: border-color 0.3s ease;
+            outline: none;
+            margin-bottom: 15px;
+        }
+        
+        input[type="number"]:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+        }
+        
+        /* クイックボタン - グリッドの最小幅を調整して崩れを防止 */
+        .quick-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); 
+            gap: 8px;
+            margin-top: 15px;
+        }
+        
+        .quick-button {
+            background-color: #e9ecef;
+            color: #495057;
+            border: none;
+            padding: 10px 0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .quick-button:hover {
+            background-color: #ced4da;
+        }
+        
+        /* 操作ボタン */
+        .control-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .control-button, .toggle-op-button {
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 100px;
+            border: none;
+        }
 
-    .toggle-op-button.minus-mode {
-        background: linear-gradient(135deg, #d32f2f, #b71c1c);
-        color: white;
-    }
-    
-    .toggle-op-button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(245, 127, 23, 0.4);
-    }
+        .control-button {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .control-button:hover {
+            background-color: #5a6268;
+        }
 
-    .bab-results {
-        margin-top: 20px;
-        padding: 15px;
-        background: #e8f8f8;
-        border: 1px solid #b2e8e8;
-        border-radius: 10px;
-        text-align: left;
-    }
+        .toggle-op-button.plus-mode {
+            background-color: #007bff;
+            color: white;
+        }
 
-    .bab-results p {
-        margin: 5px 0;
-    }
+        .toggle-op-button.minus-mode {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .toggle-op-button:hover {
+            opacity: 0.9;
+        }
 
-    .bab-results .bab-title {
-        font-weight: bold;
-        color: #00796b;
-    }
-    
+        /* 詳細/設定ボタン */
+        .meta-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .toggle-button {
+            background-color: #004d99;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .toggle-button:hover {
+            background-color: #003366;
+        }
+
+        /* 変数セクション (LB) */
+        .variable-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #e6f7ff;
+            border-radius: 8px;
+            border: 1px solid #b3e0ff;
+        }
+        
+        .variable-section h4 {
+            color: #007bff;
+            font-size: 1rem;
+            font-weight: 700;
+            margin: 0 0 15px 0;
+        }
+        
+        /* LB入力 - 集約された一つのコンテナ */
+        .variable-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* ラジオボタンの選択肢コンテナ */
+        .rate-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+
+        .rate-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: #004d99;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        /* ラジオボタン（非表示） */
+        .rate-radio {
+            display: none;
+        }
+
+        /* カスタムラジオボタン風のデザイン */
+        .rate-radio + span {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #007bff;
+            border-radius: 50%;
+            margin-right: 5px;
+            background-color: #ffffff;
+            transition: background-color 0.1s, border-color 0.1s;
+            position: relative;
+        }
+
+        .rate-radio:checked + span {
+            border-color: #007bff;
+        }
+
+        .rate-radio:checked + span::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background-color: #007bff;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .lb-input-group {
+            width: 100%;
+            max-width: 400px; /* 入力欄の幅を制限 */
+            margin-bottom: 15px;
+        }
+
+        #lbInput {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #b3e0ff;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 18px;
+        }
+
+        /* LB補助ボタンのスタイル */
+        .lb-quick-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .lb-quick-button {
+            padding: 8px 0;
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid #17a2b8;
+            background-color: #e3f2fd;
+            color: #17a2b8;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .lb-quick-button:hover {
+            background-color: #b3e5fc;
+        }
+
+        .bab-results {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f0fff0;
+            border: 1px solid #d4edda;
+            border-radius: 6px;
+            text-align: left;
+        }
+
+        .bab-results p {
+            margin: 8px 0;
+            font-size: 14px;
+        }
+
+        .bab-results .bab-title {
+            font-weight: 700;
+            color: #28a745;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        /* コピペ可能エリアのスタイル */
+        .copy-target {
+            cursor: pointer;
+            position: relative;
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .copy-target:hover {
+            background-color: #e6e6e6; /* ホバー時の視覚的フィードバック */
+        }
+
+        /* コピー時のアニメーション */
+        @keyframes copied-animation-blue {
+            0% { background-color: #007bff; color: white; }
+            50% { background-color: #007bff; color: white; }
+            100% { background-color: transparent; color: inherit; }
+        }
+
+        @keyframes copied-animation-green {
+            0% { background-color: #28a745; color: white; }
+            50% { background-color: #28a745; color: white; }
+            100% { background-color: transparent; color: inherit; }
+        }
+
+        .tax-excluded .copy-target.copied {
+            animation: copied-animation-blue 0.6s ease-out;
+        }
+        
+        .tax-included .copy-target.copied {
+            animation: copied-animation-green 0.6s ease-out;
+        }
+
+        /* 詳細セクション（省略） */
+        .details-section {
+            display: none;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: left;
+            border: 1px solid #e0e0e0;
+            animation: fadeIn 0.3s ease;
+            position: relative;
+        }
+
+        .details-section h3 {
+            color: #004d99;
+            font-size: 1.2rem;
+            margin-top: 0;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 15px;
+            padding-right: 60px;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .block-info {
+            margin: 6px 0;
+            font-size: 14px;
+            color: #495057;
+            padding-left: 10px;
+            border-left: 3px solid #007bff;
+        }
+        
+        .close-button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            transition: background-color 0.2s;
+            z-index: 10;
+        }
+        
+        .close-button:hover {
+            background: #c82333;
+        }
+
+        .rate-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 13px;
+            background: white;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .rate-table th, .rate-table td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+        }
+        
+        .rate-table th {
+            background: #004d99;
+            color: white;
+            font-weight: 700;
+        }
+        
+        .rate-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .investment-summary {
+            background: #fff8e1;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+            border: 1px solid #ffecb3;
+        }
+        
+        .investment-item {
+            margin: 10px 0;
+            font-size: 16px;
+            font-weight: 500;
+            color: #9c6500;
+        }
+
+        .investment-item strong {
+            font-weight: 700;
+        }
+        
+        .investment-item.required {
+            font-size: 24px;
+            font-weight: 700;
+            color: #dc3545;
+            margin: 15px 0;
+        }
+
+        /* 小画面でのボタン調整 */
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px 10px;
+                margin: 10px 5px;
+            }
+            .control-buttons {
+                flex-wrap: wrap;
+            }
+            .control-button, .toggle-op-button {
+                min-width: 45%;
+                margin-top: 5px;
+            }
+            .meta-buttons {
+                gap: 8px;
+            }
+            .toggle-button {
+                min-width: 48%;
+                padding: 10px 10px;
+            }
+            /* LBセクションの微調整 */
+            .lb-input-group, .lb-quick-buttons {
+                max-width: 100%;
+            }
+            .rate-selector {
+                gap: 8px;
+            }
+        }
+        
     </style>
-
 </head>
 <body>
     <div class="container">
-        <h1>🎯 ポイント計算機</h1>
+        <h1>📊 ポイント収益シミュレーター</h1>
         
         <div id="result-container">
             <div id="result" class="result-section">
                 <div class="result-item main tax-excluded">
-                    <div style="font-size: 16px; font-weight: normal;">ブロック計算（税抜）</div>
+                    <span class="result-label">ブロック計算（税抜）</span>
                     <span id="blockTaxExcluded">0</span>円
                 </div>
                 <div class="result-item main tax-included">
-                    <div style="font-size: 16px; font-weight: normal;">ブロック計算（税込）</div>
+                    <span class="result-label">ブロック計算（税込）</span>
                     <span id="blockTaxIncluded">0</span>円
                 </div>
             </div>
         </div>
 
+        <div class="input-section">
+            <input type="number" id="points" placeholder="ポイント数を入力" min="0" max="99999999" oninput="calculateAmount()">
+            
+            <div class="quick-buttons" id="quickButtons">
+                <button class="quick-button" onclick="addPoints(50000)">+50000</button>
+                <button class="quick-button" onclick="addPoints(10000)">+10000</button>
+                <button class="quick-button" onclick="addPoints(1000)">+1000</button>
+                <button class="quick-button" onclick="addPoints(500)">+500</button>
+                <button class="quick-button" onclick="addPoints(100)">+100</button>
+                <button class="quick-button" onclick="addPoints(50)">+50</button>
+                <button class="quick-button" onclick="addPoints(10)">+10</button>
+                <button class="quick-button" onclick="addPoints(5)">+5</button>
+                <button class="quick-button" onclick="addPoints(1)">+1</button>
+            </div>
+            
+            <div class="control-buttons">
+                <button class="toggle-op-button plus-mode" id="toggleButton" onclick="toggleOperation()">➕ 加算モード</button>
+                <button class="control-button" onclick="clearPoints()">🗑️ クリア</button>
+                <button class="control-button" onclick="setRoundNumber()">📦 ブロック丸め</button>
+            </div>
+            
+            <div class="variable-section">
+                <h4>🧮 LBポイント換算</h4>
+                <div class="variable-container">
+                    
+                    <div class="rate-selector">
+                        <label class="rate-label" for="rate5">
+                            <input type="radio" id="rate5" name="lb_rate" class="rate-radio" value="0.05" checked onchange="calculateAmount()"> <span></span> 5% LB
+                        </label>
+                        <label class="rate-label" for="rate10">
+                            <input type="radio" id="rate10" name="lb_rate" class="rate-radio" value="0.10" onchange="calculateAmount()"> <span></span> 10% LB
+                        </label>
+                        <label class="rate-label" for="rate2_5">
+                            <input type="radio" id="rate2_5" name="lb_rate" class="rate-radio" value="0.025" onchange="calculateAmount()"> <span></span> 2.5% LB
+                        </label>
+                    </div>
 
-    <div class="input-section">
-        <input type="number" id="points" placeholder="ポイント数を入力" min="0" max="99999999" oninput="calculateAmount()">
-        
-        <div class="quick-buttons" id="quickButtons">
-            <button class="quick-button" onclick="addPoints(1000)">+1000</button>
-            <button class="quick-button" onclick="addPoints(500)">+500</button>
-            <button class="quick-button" onclick="addPoints(100)">+100</button>
-            <button class="quick-button" onclick="addPoints(50)">+50</button>
-            <button class="quick-button" onclick="addPoints(10)">+10</button>
-            <button class="quick-button" onclick="addPoints(5)">+5</button>
-            <button class="quick-button" onclick="addPoints(1)">+1</button>
-        </div>
-        
-        <div class="control-buttons">
-            <button class="toggle-op-button plus-mode" id="toggleButton" onclick="toggleOperation()">プラス</button>
-            <button class="control-button" onclick="clearPoints()">🗑️ クリア</button>
-            <button class="control-button" onclick="setRoundNumber()">📦 きりの良い数</button>
-        </div>
-        
-        <div class="variable-section">
-            <h4>📊 追加BAB計算</h4>
-            <div class="variable-inputs">
-                <div class="variable-item">
-                    <label>5%BAB:</label>
-                    <input type="number" id="var5" placeholder="0" min="0" oninput="calculateAmount()">
+                    <div class="lb-input-group">
+                        <input type="number" id="lbInput" placeholder="LBポイントを入力" min="0" oninput="calculateAmount()">
+                    </div>
+
+                    <div class="lb-quick-buttons">
+                        <button class="lb-quick-button" onclick="addLBPoints(100)">+100</button>
+                        <button class="lb-quick-button" onclick="addLBPoints(500)">+500</button>
+                        <button class="lb-quick-button" onclick="addLBPoints(1000)">+1000</button>
+                        <button class="lb-quick-button" onclick="addLBPoints(5000)">+5000</button>
+                        <button class="lb-quick-button" onclick="addLBPoints(10000)">+10000</button>
+                        <button class="lb-quick-button" onclick="addLBPoints(50000)">+50000</button>
+                    </div>
                 </div>
-                <div class="variable-item">
-                    <label>10%BAB:</label>
-                    <input type="number" id="var10" placeholder="0" min="0" oninput="calculateAmount()">
-                </div>
-                <div class="variable-item">
-                    <label>2.5%BAB:</label>
-                    <input type="number" id="var2_5" placeholder="0" min="0" oninput="calculateAmount()">
+                
+                <button class="control-button" style="background-color: #17a2b8; margin-top: 15px;" onclick="clearLB()">🧹 LBクリア</button>
+                <div class="bab-results">
+                    <p class="bab-title">LB合計金額</p>
+                    <p>税抜: <span id="variableTaxExcluded">0</span>円</p>
+                    <p>税込: <span id="variableTaxIncluded">0</span>円</p>
+                    <hr style="margin: 10px 0; border-top: 1px solid #d4edda;">
+                    <p class="bab-title">💰 全体合計（ブロック＋LB）</p>
+                    <p>税抜: 
+                        <span id="totalTaxExcluded" class="copy-target" onclick="copyToClipboard('totalTaxExcluded')">0</span>円
+                    </p>
+                    <p>税込: 
+                        <span id="totalTaxIncluded" class="copy-target" onclick="copyToClipboard('totalTaxIncluded')">0</span>円
+                    </p>
                 </div>
             </div>
-            <button class="control-button" onclick="clearVariables()">🧹 BABクリア</button>
-            <div class="bab-results">
-                <p class="bab-title">BAB合計金額</p>
-                <p>税抜: <span id="variableTaxExcluded">0</span>円</p>
-                <p>税込: <span id="variableTaxIncluded">0</span>円</p>
-                <br>
-                <p class="bab-title">合計（ブロック＋BAB）</p>
-                <p>税抜: <span id="totalTaxExcluded">0</span>円</p>
-                <p>税込: <span id="totalTaxIncluded">0</span>円</p>
-            </div>
         </div>
-    </div>
-    
-    <div style="margin-top: 30px;">
-        <button class="toggle-button" onclick="toggleDetails()">📊 計算詳細</button>
-        <button class="toggle-button" onclick="toggleRateTable()">📋 レート表</button>
-        <button class="toggle-button" onclick="toggleInvestment()">💎 必要資産価値</button>
-    </div>
-    
-    <div id="calculationDetails" class="details-section">
-        <button class="close-button" onclick="hideDetails()">✕</button>
-        <h3>🧮 計算詳細</h3>
-        <div id="calculationSteps"></div>
-    </div>
-    
-    <div id="rateTableSection" class="details-section">
-        <button class="close-button" onclick="hideRateTable()">✕</button>
-        <h3>📋 ブロック別レート表</h3>
-        <p><strong>1ブロック = 500ポイント</strong></p>
-        <p>端数も達成済みブロックの最高レートで計算されます</p>
-        <table class="rate-table">
-            <thead>
-                <tr>
-                    <th>ブロック</th>
-                    <th>ポイント範囲</th>
-                    <th>レート (%)</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr><td>1ブロック目</td><td>1 - 500</td><td>5%</td></tr>
-                <tr><td>2ブロック目</td><td>501 - 1,000</td><td>5%</td></tr>
-                <tr><td>3ブロック目</td><td>1,001 - 1,500</td><td>10%</td></tr>
-                <tr><td>4ブロック目</td><td>1,501 - 2,000</td><td>15%</td></tr>
-                <tr><td>5ブロック目</td><td>2,001 - 2,500</td><td>20%</td></tr>
-                <tr><td>6ブロック目</td><td>2,501 - 3,000</td><td>25%</td></tr>
-                <tr><td>7ブロック目以降</td><td>3,001以上</td><td>30%</td></tr>
-            </tbody>
-        </table>
-    </div>
-    
-    <div id="investmentSection" class="details-section">
-        <button class="close-button" onclick="hideInvestment()">✕</button>
-        <h3>💎 必要資産価値</h3>
-        <p><strong>年利5%で同等収益を生む資産価値</strong></p>
         
-        <div class="investment-summary">
-            <div class="investment-item">
-                <strong>月収入:</strong> <span id="monthlyIncome"></span>円
-            </div>
-            <div class="investment-item">
-                <strong>年収入:</strong> <span id="annualIncome"></span>円
-            </div>
-            <div class="investment-item" style="color: #dc3545; font-size: 20px;">
-                <strong>必要資産価値:</strong> <span id="requiredAssets"></span>円
-            </div>
-            <div class="investment-item" style="font-size: 14px; color: #666; margin-top: 15px;">
-                ※年利5%で月<span id="monthlyIncomeRepeat"></span>円の収益を得るのに必要な元本額
+        <div class="meta-buttons">
+            <button class="toggle-button" onclick="toggleDetails()">📄 計算詳細</button>
+            <button class="toggle-button" onclick="toggleRateTable()">📋 レート情報</button>
+            <button class="toggle-button" onclick="toggleInvestment()">📈 資産価値シミュレーション</button>
+        </div>
+        
+        <div id="calculationDetails" class="details-section">
+            <button class="close-button" onclick="hideDetails()">✕ 閉じる</button>
+            <h3>🧮 計算プロセス詳細</h3>
+            <div id="calculationSteps"></div>
+        </div>
+        
+        <div id="rateTableSection" class="details-section">
+            <button class="close-button" onclick="hideRateTable()">✕ 閉じる</button>
+            <h3>📋 ブロック別レート情報</h3>
+            <p><strong>基本情報: 1ブロック = 500ポイント / 基準額 = 120円</strong></p>
+            <p style="font-size: 13px; color: #666;">※端数ポイントは、達成済みブロックの**最高レート**で計算されます。</p>
+            <table class="rate-table">
+                <thead>
+                    <tr>
+                        <th>ブロック数</th>
+                        <th>ポイント範囲</th>
+                        <th>レート (%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>1st</td><td>1 - 500</td><td>5%</td></tr>
+                    <tr><td>2nd</td><td>501 - 1,000</td><td>5%</td></tr>
+                    <tr><td>3rd</td><td>1,001 - 1,500</td><td>10%</td></tr>
+                    <tr><td>4th</td><td>1,501 - 2,000</td><td>15%</td></tr>
+                    <tr><td>5th</td><td>2,001 - 2,500</td><td>20%</td></tr>
+                    <tr><td>6th</td><td>2,501 - 3,000</td><td>25%</td></tr>
+                    <tr><td>7th+</td><td>3,001以上</td><td>30%</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div id="investmentSection" class="details-section">
+            <button class="close-button" onclick="hideInvestment()">✕ 閉じる</button>
+            <h3>📈 必要資産価値シミュレーション</h3>
+            <p style="font-size: 13px; color: #666;">このポイント収益と同等の**月収益**を、**年利5%**で生み出すのに必要な元本額をシミュレーションします。</p>
+            
+            <div class="investment-summary">
+                <div class="investment-item">
+                    <strong>シミュレーション月収入:</strong> <span id="monthlyIncome"></span>円
+                </div>
+                <div class="investment-item">
+                    <strong>年間収入換算:</strong> <span id="annualIncome"></span>円
+                </div>
+                <div class="investment-item required">
+                    <strong>必要資産価値 (元本):</strong> <span id="requiredAssets"></span>円
+                </div>
+                <div class="investment-item" style="font-size: 12px; color: #9c6500; margin-top: 15px;">
+                    ※年利5%で月<span id="monthlyIncomeRepeat"></span>円の収益を得るのに必要な元本額
+                </div>
             </div>
         </div>
     </div>
-</div>
 
 <script>
     const blockRates = [
@@ -487,12 +676,8 @@
     const TAX_RATE = 1.1;
     const MAX_RATE = 30;
     
-    let isAdding = true; // プラス/マイナス切り替え用
+    let isAdding = true;
 
-    function getBlockNumber(points) {
-        return Math.floor((points - 1) / POINTS_PER_BLOCK) + 1;
-    }
-    
     function getRateForBlock(blockNumber) {
         if (blockNumber <= 0) return 0;
         if (blockNumber <= blockRates.length) {
@@ -505,15 +690,18 @@
         const pointsInput = document.getElementById('points');
         const points = parseInt(pointsInput.value) || 0;
         
-        // 変数の取得
-        const var5 = parseInt(document.getElementById('var5').value) || 0;
-        const var10 = parseInt(document.getElementById('var10').value) || 0;
-        const var2_5 = parseInt(document.getElementById('var2_5').value) || 0;
+        // 修正点: LBポイントを一つの入力欄から取得
+        const lbPoints = parseInt(document.getElementById('lbInput').value) || 0;
+
+        // 修正点: 選択されているLBレートを取得
+        const selectedRateElement = document.querySelector('input[name="lb_rate"]:checked');
+        const lbRate = selectedRateElement ? parseFloat(selectedRateElement.value) : 0;
+        const lbRatePercentage = selectedRateElement ? (lbRate * 100).toFixed(1).replace(/\.0$/, '') : 0; // 表示用のパーセント（小数点以下を削除）
         
         let blockTaxExcluded = 0;
         let calculationDetails = [];
         
-        // ブロック計算
+        // ブロック計算 (省略)
         const completedBlocks = Math.floor(points / POINTS_PER_BLOCK);
         const remainderPoints = points % POINTS_PER_BLOCK;
             
@@ -531,25 +719,43 @@
             });
         }
         
-        if (remainderPoints > 0 && completedBlocks > 0) {
-            const remainderRate = getRateForBlock(completedBlocks);
-            const remainderAmount = remainderPoints * (remainderRate / 100) * BASE_AMOUNT;
-            blockTaxExcluded += remainderAmount;
-            
-            calculationDetails.push({
-                block: completedBlocks + 'ブロック目レート',
-                points: remainderPoints,
-                rate: remainderRate,
-                amount: remainderAmount,
-                type: 'remainder'
-            });
+        if (remainderPoints > 0) {
+            if (completedBlocks === 0) {
+                if (remainderPoints > 0) { 
+                    const rateForFirstBlock = getRateForBlock(1);
+                    const remainderAmount = remainderPoints * (rateForFirstBlock / 100) * BASE_AMOUNT;
+                    blockTaxExcluded += remainderAmount;
+                    calculationDetails.push({
+                        block: '1stブロックのレート',
+                        points: remainderPoints,
+                        rate: rateForFirstBlock,
+                        amount: remainderAmount,
+                        type: 'remainder'
+                    });
+                }
+            } else {
+                 const remainderRateForCalc = getRateForBlock(completedBlocks);
+                 const remainderAmount = remainderPoints * (remainderRateForCalc / 100) * BASE_AMOUNT;
+                 blockTaxExcluded += remainderAmount;
+                 calculationDetails.push({
+                    block: completedBlocks + 'ブロック目レート',
+                    points: remainderPoints,
+                    rate: remainderRateForCalc,
+                    amount: remainderAmount,
+                    type: 'remainder'
+                });
+            }
         }
         
-        // 変数計算
-        const var5Amount = var5 * 0.05 * BASE_AMOUNT;
-        const var10Amount = var10 * 0.10 * BASE_AMOUNT;
-        const var2_5Amount = var2_5 * 0.025 * BASE_AMOUNT;
-        const variableTaxExcluded = var5Amount + var10Amount + var2_5Amount;
+        // 修正点: LB計算 - 単一の入力値と選択されたレートで計算
+        let variableTaxExcluded = 0;
+        let lbAmount = 0;
+
+        if (lbPoints > 0 && lbRate > 0) {
+            lbAmount = lbPoints * lbRate * BASE_AMOUNT;
+            variableTaxExcluded = lbAmount;
+        }
+
         
         // 合計
         const totalTaxExcluded = Math.floor(blockTaxExcluded + variableTaxExcluded);
@@ -569,58 +775,85 @@
         document.getElementById('totalTaxIncluded').textContent = totalTaxIncluded.toLocaleString();
         
         // 詳細セクションの更新
-        updateCalculationDetails(points, completedBlocks, remainderPoints, blockTaxExcluded, var5, var10, var2_5, var5Amount, var10Amount, var2_5Amount, variableTaxExcluded, totalTaxExcluded, totalTaxIncluded, calculationDetails);
+        updateCalculationDetails(points, completedBlocks, remainderPoints, blockTaxExcluded, lbPoints, lbRatePercentage, lbAmount, variableTaxExcluded, totalTaxExcluded, totalTaxIncluded, calculationDetails);
         
         // 必要資産価値計算
         updateInvestmentSimulation(totalTaxIncluded);
     }
     
-    function updateCalculationDetails(points, completedBlocks, remainderPoints, blockTaxExcluded, var5, var10, var2_5, var5Amount, var10Amount, var2_5Amount, variableTaxExcluded, totalTaxExcluded, totalTaxIncluded, calculationDetails) {
+    // 修正点: コピー機能の追加
+    function copyToClipboard(elementId) {
+        const element = document.getElementById(elementId);
+        // カンマを除去して純粋な数字を取得
+        const textToCopy = element.textContent.replace(/,/g, ''); 
+        
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                element.classList.add('copied');
+                setTimeout(() => {
+                    element.classList.remove('copied');
+                }, 600);
+            }).catch(err => {
+                console.error('コピー失敗:', err);
+                alert('コピーに失敗しました。お手数ですが手動でコピーしてください。');
+            });
+        } else {
+            alert("クリップボード機能が利用できません。手動でコピーしてください:\n" + textToCopy);
+        }
+    }
+
+
+    // 修正点: 詳細表示の関数を単一のLB入力に対応
+    function updateCalculationDetails(points, completedBlocks, remainderPoints, blockTaxExcluded, lbPoints, lbRatePercentage, lbAmount, variableTaxExcluded, totalTaxExcluded, totalTaxIncluded, calculationDetails) {
         let detailsHTML = '';
         
-        // ブロック計算詳細
-        detailsHTML += '<div class="block-info">🎯 入力ポイント: <strong>' + points.toLocaleString() + 'ポイント</strong></div>';
-        detailsHTML += '<div class="block-info">📦 完全達成ブロック: <strong>' + completedBlocks + 'ブロック</strong> (' + (completedBlocks * POINTS_PER_BLOCK).toLocaleString() + 'ポイント)</div>';
-        detailsHTML += '<div class="block-info">📊 端数ポイント: <strong>' + remainderPoints + 'ポイント</strong>';
-        if (remainderPoints > 0 && completedBlocks > 0) {
-            detailsHTML += ' (' + getRateForBlock(completedBlocks) + '%で計算)';
-        } else if (remainderPoints > 0) {
-            detailsHTML += ' (達成ブロックなしのため計算対象外)';
-        }
-        detailsHTML += '</div><br>';
+        // ブロック計算詳細 (省略)
+        detailsHTML += '<div class="block-info">🎯 **入力ポイント**: <strong>' + points.toLocaleString() + 'ポイント</strong></div>';
+        detailsHTML += '<div class="block-info">📦 **完全達成ブロック**: <strong>' + completedBlocks + 'ブロック</strong> (' + (completedBlocks * POINTS_PER_BLOCK).toLocaleString() + 'ポイント)</div>';
+        detailsHTML += '<div class="block-info">📊 **残余ポイント**: <strong>' + remainderPoints + 'ポイント</strong></div><br>';
         
-        if (completedBlocks > 0 || remainderPoints > 0) {
-            detailsHTML += '<div style="font-weight: bold; color: #495057;">🧮 ブロック別計算:</div>';
+        if (calculationDetails.length > 0) {
+            detailsHTML += '<div style="font-weight: bold; color: #004d99; margin-bottom: 5px;">🧮 ブロック別収益計算 (税抜):</div>';
             for (const detail of calculationDetails) {
-                if (detail.type === 'completed') {
-                    detailsHTML += '<div class="block-info">📋 ' + detail.block + 'ブロック目: ' + detail.points + 'pt × ' + detail.rate + '% × ' + BASE_AMOUNT + '円 = <strong>' + Math.floor(detail.amount).toLocaleString() + '円</strong></div>';
-                } else if (detail.type === 'remainder') {
-                    detailsHTML += '<div class="block-info" style="color: #ff6b35;">📊 端数計算: ' + detail.points + 'pt × ' + detail.rate + '% × ' + BASE_AMOUNT + '円 = <strong>' + Math.floor(detail.amount).toLocaleString() + '円</strong></div>';
-                }
+                const rateLabel = detail.type === 'remainder' && completedBlocks === 0 ? ' (1stブロック)' : '';
+                detailsHTML += '<div class="block-info" style="border-left-color: ' + (detail.type === 'remainder' ? '#ff6b35' : '#007bff') + ';">';
+                detailsHTML += '📋 ' + detail.block + rateLabel + ': ' + detail.points + 'pt × ' + detail.rate + '% × ' + BASE_AMOUNT + '円 = <strong>' + Math.floor(detail.amount).toLocaleString() + '円</strong>';
+                detailsHTML += '</div>';
             }
-            detailsHTML += '<div class="block-info">💰 ブロック小計: <strong>' + Math.floor(blockTaxExcluded).toLocaleString() + '円</strong></div><br>';
+            detailsHTML += '<div class="block-info" style="border-left-color: #28a745; margin-top: 10px;">💰 **ブロック小計 (税抜)**: <strong>' + Math.floor(blockTaxExcluded).toLocaleString() + '円</strong></div><br>';
         }
 
-        // BAB計算詳細
-        if (var5 > 0 || var10 > 0 || var2_5 > 0) {
-            detailsHTML += '<div style="font-weight: bold; color: #495057;">📊 BAB計算:</div>';
-            if (var5 > 0) {
-                detailsHTML += '<div class="block-info">🔹 5%: ' + var5.toLocaleString() + ' × 5% × ' + BASE_AMOUNT + '円 = <strong>' + Math.floor(var5Amount).toLocaleString() + '円</strong></div>';
-            }
-            if (var10 > 0) {
-                detailsHTML += '<div class="block-info">🔹 10%: ' + var10.toLocaleString() + ' × 10% × ' + BASE_AMOUNT + '円 = <strong>' + Math.floor(var10Amount).toLocaleString() + '円</strong></div>';
-            }
-            if (var2_5 > 0) {
-                detailsHTML += '<div class="block-info">🔹 2.5%: ' + var2_5.toLocaleString() + ' × 2.5% × ' + BASE_AMOUNT + '円 = <strong>' + Math.floor(var2_5Amount).toLocaleString() + '円</strong></div>';
-            }
-            detailsHTML += '<div class="block-info">📊 BAB小計: <strong>' + Math.floor(variableTaxExcluded).toLocaleString() + '円</strong></div><br>';
+        // 修正点: LB計算詳細 - 単一の入力とレートを表示
+        if (lbPoints > 0 && lbRatePercentage > 0) {
+            detailsHTML += '<div style="font-weight: bold; color: #004d99; margin-bottom: 5px;">📊 LB収益計算 (税抜):</div>';
+            
+            detailsHTML += '<div class="block-info" style="border-left-color: #17a2b8;">🔹 ' + lbPoints.toLocaleString() + ' LBポイント × ' + lbRatePercentage + '% × ' + BASE_AMOUNT + '円 = <strong>' + Math.floor(lbAmount).toLocaleString() + '円</strong></div>';
+            
+            detailsHTML += '<div class="block-info" style="border-left-color: #28a745; margin-top: 10px;">📊 **LB小計 (税抜)**: <strong>' + Math.floor(variableTaxExcluded).toLocaleString() + '円</strong></div><br>';
+        } else if (lbPoints > 0) {
+            detailsHTML += '<div class="block-info" style="border-left-color: #dc3545;">⚠️ LBポイントが入力されていますが、レート（5%, 10%, 2.5%）が選択されていません。</div><br>';
         }
         
-        // 合計
-        detailsHTML += '<div class="block-info">💰 合計税抜: <strong>' + totalTaxExcluded.toLocaleString() + '円</strong></div>';
-        detailsHTML += '<div class="block-info">💳 税込計算: ' + totalTaxExcluded.toLocaleString() + '円 × ' + TAX_RATE + ' = <strong>' + totalTaxIncluded.toLocaleString() + '円</strong></div>';
+        // 合計 (変更なし)
+        detailsHTML += '<div style="font-weight: bold; color: #004d99; margin-bottom: 5px;">📈 最終合計:</div>';
+        detailsHTML += '<div class="block-info" style="border-left-color: #343a40;">💰 **全体合計 (税抜)**: <strong>' + totalTaxExcluded.toLocaleString() + '円</strong></div>';
+        detailsHTML += '<div class="block-info" style="border-left-color: #28a745;">💳 **全体合計 (税込)**: ' + totalTaxExcluded.toLocaleString() + '円 × ' + TAX_RATE + ' = <strong>' + totalTaxIncluded.toLocaleString() + '円</strong></div>';
         
         document.getElementById('calculationSteps').innerHTML = detailsHTML;
+    }
+    
+    // 修正点: LBポイントを増やす関数を単一の入力欄に対応
+    function addLBPoints(amount) {
+        const input = document.getElementById('lbInput');
+        let currentValue = parseInt(input.value) || 0;
+        
+        currentValue += amount;
+        if (currentValue < 0) {
+            currentValue = 0;
+        }
+        
+        input.value = currentValue;
+        calculateAmount(); // 再計算
     }
     
     function toggleDetails() {
@@ -662,6 +895,7 @@
             investment.style.display = 'block';
             details.style.display = 'none';
             rateTable.style.display = 'none';
+            updateInvestmentSimulation(parseInt(document.getElementById('totalTaxIncluded').textContent.replace(/,/g, '')) || 0);
         }
     }
     
@@ -677,11 +911,9 @@
         document.getElementById('investmentSection').style.display = 'none';
     }
     
-    // 必要資産価値計算
     function updateInvestmentSimulation(monthlyAmount) {
-        const annualRate = 5; // 年利5%
+        const annualRate = 5;
         
-        // 必要資産価値を計算（月収入を年利5%で得るのに必要な元本）
         const monthlyIncome = monthlyAmount;
         const annualIncome = monthlyIncome * 12;
         const requiredAssets = Math.floor(annualIncome / (annualRate / 100));
@@ -696,13 +928,14 @@
         const pointsInput = document.getElementById('points');
         let currentValue = parseInt(pointsInput.value) || 0;
         
+        let finalAmount = amount;
         if (!isAdding) {
-            amount = -amount; // マイナスモードの場合は減算
+            finalAmount = -amount;
         }
         
-        currentValue += amount;
+        currentValue += finalAmount;
         if (currentValue < 0) {
-            currentValue = 0; // 0未満にはならないようにする
+            currentValue = 0;
         }
         
         pointsInput.value = currentValue;
@@ -716,7 +949,7 @@
 
         buttons.forEach(button => {
             const currentText = button.textContent;
-            const number = currentText.substring(1);
+            const number = currentText.replace(/[+-]/g, '');
             if (isAdding) {
                 button.textContent = '+' + number;
             } else {
@@ -725,11 +958,11 @@
         });
         
         if (isAdding) {
-            toggleButton.textContent = 'プラス';
+            toggleButton.textContent = '➕ 加算モード';
             toggleButton.classList.remove('minus-mode');
             toggleButton.classList.add('plus-mode');
         } else {
-            toggleButton.textContent = 'マイナス';
+            toggleButton.textContent = '➖ 減算モード';
             toggleButton.classList.remove('plus-mode');
             toggleButton.classList.add('minus-mode');
         }
@@ -744,24 +977,25 @@
     function setRoundNumber() {
         const pointsInput = document.getElementById('points');
         const currentValue = parseInt(pointsInput.value) || 0;
-        const roundedValue = Math.ceil(currentValue / 500) * 500;
+        const roundedValue = Math.ceil(currentValue / POINTS_PER_BLOCK) * POINTS_PER_BLOCK; 
         pointsInput.value = roundedValue;
         calculateAmount();
     }
     
-    function clearVariables() {
-        document.getElementById('var5').value = '';
-        document.getElementById('var10').value = '';
-        document.getElementById('var2_5').value = '';
+    // 修正点: LBクリア関数を単一の入力欄に対応
+    function clearLB() {
+        document.getElementById('lbInput').value = '';
+        
+        // デフォルトレート(5%)を再度チェック状態にする
+        document.getElementById('rate5').checked = true;
+        
         calculateAmount();
     }
 
-    // ページ読み込み時に計算を実行して初期値を表示
     document.addEventListener('DOMContentLoaded', (event) => {
         calculateAmount();
     });
 </script>
-
 
 </body>
 </html>
