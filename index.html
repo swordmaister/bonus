@@ -123,6 +123,12 @@
         }
         
         .quick-button {
+            /* 変更点: ボタンのコピー選択禁止 */
+            user-select: none;
+            -webkit-user-select: none; /* Safari対応 */
+            -moz-user-select: none; /* Firefox対応 */
+            -ms-user-select: none; /* IE/Edge対応 */
+            
             background-color: #e9ecef;
             color: #495057;
             border: none;
@@ -148,6 +154,12 @@
         }
         
         .control-button, .toggle-op-button {
+            /* 変更点: ボタンのコピー選択禁止 */
+            user-select: none;
+            -webkit-user-select: none; /* Safari対応 */
+            -moz-user-select: none; /* Firefox対応 */
+            -ms-user-select: none; /* IE/Edge対応 */
+            
             padding: 10px 15px;
             border-radius: 6px;
             font-size: 14px;
@@ -191,6 +203,12 @@
         }
 
         .toggle-button {
+            /* 変更点: ボタンのコピー選択禁止 */
+            user-select: none;
+            -webkit-user-select: none; /* Safari対応 */
+            -moz-user-select: none; /* Firefox対応 */
+            -ms-user-select: none; /* IE/Edge対応 */
+            
             background-color: #004d99;
             color: white;
             border: none;
@@ -306,6 +324,12 @@
         }
 
         .lb-quick-button {
+            /* 変更点: ボタンのコピー選択禁止 */
+            user-select: none;
+            -webkit-user-select: none; /* Safari対応 */
+            -moz-user-select: none; /* Firefox対応 */
+            -ms-user-select: none; /* IE/Edge対応 */
+            
             padding: 8px 0;
             font-size: 13px;
             font-weight: 500;
@@ -342,40 +366,8 @@
             margin-bottom: 10px;
         }
 
-        /* コピペ可能エリアのスタイル */
-        .copy-target {
-            cursor: pointer;
-            position: relative;
-            display: inline-block;
-            padding: 5px 10px;
-            border-radius: 4px;
-            transition: background-color 0.3s ease;
-        }
-        
-        .copy-target:hover {
-            background-color: #e6e6e6; /* ホバー時の視覚的フィードバック */
-        }
-
-        /* コピー時のアニメーション */
-        @keyframes copied-animation-blue {
-            0% { background-color: #007bff; color: white; }
-            50% { background-color: #007bff; color: white; }
-            100% { background-color: transparent; color: inherit; }
-        }
-
-        @keyframes copied-animation-green {
-            0% { background-color: #28a745; color: white; }
-            50% { background-color: #28a745; color: white; }
-            100% { background-color: transparent; color: inherit; }
-        }
-
-        .tax-excluded .copy-target.copied {
-            animation: copied-animation-blue 0.6s ease-out;
-        }
-        
-        .tax-included .copy-target.copied {
-            animation: copied-animation-green 0.6s ease-out;
-        }
+        /* 変更点: コピー関連のスタイルを削除 */
+        /* .copy-target, @keyframes copied-animation-blue, @keyframes copied-animation-green は削除 */
 
         /* 詳細セクション（省略） */
         .details-section {
@@ -414,6 +406,12 @@
         }
         
         .close-button {
+            /* 変更点: ボタンのコピー選択禁止 */
+            user-select: none;
+            -webkit-user-select: none; /* Safari対応 */
+            -moz-user-select: none; /* Firefox対応 */
+            -ms-user-select: none; /* IE/Edge対応 */
+            
             background: #dc3545;
             color: white;
             border: none;
@@ -592,10 +590,10 @@
                     <hr style="margin: 10px 0; border-top: 1px solid #d4edda;">
                     <p class="bab-title">💰 全体合計（ブロック＋LB）</p>
                     <p>税抜: 
-                        <span id="totalTaxExcluded" class="copy-target" onclick="copyToClipboard('totalTaxExcluded')">0</span>円
+                        <span id="totalTaxExcluded">0</span>円
                     </p>
                     <p>税込: 
-                        <span id="totalTaxIncluded" class="copy-target" onclick="copyToClipboard('totalTaxIncluded')">0</span>円
+                        <span id="totalTaxIncluded">0</span>円
                     </p>
                 </div>
             </div>
@@ -690,13 +688,11 @@
         const pointsInput = document.getElementById('points');
         const points = parseInt(pointsInput.value) || 0;
         
-        // 修正点: LBポイントを一つの入力欄から取得
         const lbPoints = parseInt(document.getElementById('lbInput').value) || 0;
 
-        // 修正点: 選択されているLBレートを取得
         const selectedRateElement = document.querySelector('input[name="lb_rate"]:checked');
         const lbRate = selectedRateElement ? parseFloat(selectedRateElement.value) : 0;
-        const lbRatePercentage = selectedRateElement ? (lbRate * 100).toFixed(1).replace(/\.0$/, '') : 0; // 表示用のパーセント（小数点以下を削除）
+        const lbRatePercentage = selectedRateElement ? (lbRate * 100).toFixed(1).replace(/\.0$/, '') : 0; 
         
         let blockTaxExcluded = 0;
         let calculationDetails = [];
@@ -747,7 +743,7 @@
             }
         }
         
-        // 修正点: LB計算 - 単一の入力値と選択されたレートで計算
+        // LB計算
         let variableTaxExcluded = 0;
         let lbAmount = 0;
 
@@ -781,29 +777,11 @@
         updateInvestmentSimulation(totalTaxIncluded);
     }
     
-    // 修正点: コピー機能の追加
-    function copyToClipboard(elementId) {
-        const element = document.getElementById(elementId);
-        // カンマを除去して純粋な数字を取得
-        const textToCopy = element.textContent.replace(/,/g, ''); 
-        
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                element.classList.add('copied');
-                setTimeout(() => {
-                    element.classList.remove('copied');
-                }, 600);
-            }).catch(err => {
-                console.error('コピー失敗:', err);
-                alert('コピーに失敗しました。お手数ですが手動でコピーしてください。');
-            });
-        } else {
-            alert("クリップボード機能が利用できません。手動でコピーしてください:\n" + textToCopy);
-        }
-    }
+    // 変更点: copyToClipboard 関数を削除
+    /* function copyToClipboard(elementId) { ... } */
 
 
-    // 修正点: 詳細表示の関数を単一のLB入力に対応
+    // 詳細表示の関数
     function updateCalculationDetails(points, completedBlocks, remainderPoints, blockTaxExcluded, lbPoints, lbRatePercentage, lbAmount, variableTaxExcluded, totalTaxExcluded, totalTaxIncluded, calculationDetails) {
         let detailsHTML = '';
         
@@ -823,7 +801,7 @@
             detailsHTML += '<div class="block-info" style="border-left-color: #28a745; margin-top: 10px;">💰 **ブロック小計 (税抜)**: <strong>' + Math.floor(blockTaxExcluded).toLocaleString() + '円</strong></div><br>';
         }
 
-        // 修正点: LB計算詳細 - 単一の入力とレートを表示
+        // LB計算詳細
         if (lbPoints > 0 && lbRatePercentage > 0) {
             detailsHTML += '<div style="font-weight: bold; color: #004d99; margin-bottom: 5px;">📊 LB収益計算 (税抜):</div>';
             
@@ -842,7 +820,7 @@
         document.getElementById('calculationSteps').innerHTML = detailsHTML;
     }
     
-    // 修正点: LBポイントを増やす関数を単一の入力欄に対応
+    // LBポイントを増やす関数
     function addLBPoints(amount) {
         const input = document.getElementById('lbInput');
         let currentValue = parseInt(input.value) || 0;
@@ -982,7 +960,7 @@
         calculateAmount();
     }
     
-    // 修正点: LBクリア関数を単一の入力欄に対応
+    // LBクリア関数
     function clearLB() {
         document.getElementById('lbInput').value = '';
         
